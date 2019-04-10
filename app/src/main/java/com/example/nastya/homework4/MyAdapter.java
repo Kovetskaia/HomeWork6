@@ -5,6 +5,9 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
+import org.joda.time.format.DateTimeFormat;
+import org.joda.time.format.DateTimeFormatter;
+
 import java.util.List;
 
 import androidx.recyclerview.widget.RecyclerView;
@@ -16,6 +19,7 @@ interface Listener {
 public class MyAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     private List<ListItem> newsList;
     private Listener listener;
+    private DateTimeFormatter dateFormat = DateTimeFormat.forPattern("yyyy-MMMM-dd");
 
     MyAdapter(List<ListItem> news, Listener listener) {
         this.newsList = news;
@@ -60,7 +64,7 @@ public class MyAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
             case ListItem.TYPE_NEWS: {
                 ItemNews itemNews = (ItemNews) newsList.get(position);
                 ((NewsViewHolder) holder).titleNews.setText(itemNews.getTitleNews());
-                ((NewsViewHolder) holder).dateNews.setText(itemNews.getDateNews());
+                ((NewsViewHolder) holder).dateNews.setText(dateFormat.print(itemNews.getDateNews()));
                 ((NewsViewHolder) holder).descriptionNews.setText(itemNews.getDescriptionNews());
                 break;
             }

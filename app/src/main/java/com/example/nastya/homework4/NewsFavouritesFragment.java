@@ -8,6 +8,8 @@ import android.view.ViewGroup;
 import java.util.ArrayList;
 import java.util.List;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -22,14 +24,18 @@ public class NewsFavouritesFragment extends Fragment {
     private final CompositeDisposable mDisposable = new CompositeDisposable();
     private List<ListItem> newsList = new ArrayList<>();
     private List<FavouritesNews> currentFavouritesNews = new ArrayList<>();
-    private View rootView;
     private NewsDao newsDao;
+    private View rootView;
     private List<FavouritesNews> idToDelete = new ArrayList<>();
     private List<Long> idNews = new ArrayList<>();
+    private MyAdapter myAdapter;
+    private RecyclerView recyclerView;
+
+
 
     @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
+    public void onActivityCreated(Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
         NewsDatabase db = App.getInstance().getDatabase();
         newsDao = db.newsDao();
         FavouritesNewsDao favouritesNewsDao = db.favouritesNewsDao();
@@ -64,14 +70,22 @@ public class NewsFavouritesFragment extends Fragment {
         return rootView;
     }
 
-    private void setAdapter() {
-        RecyclerView recyclerView = rootView.findViewById(R.id.recyclerView);
-        recyclerView.setAdapter(new MyAdapter(newsList, (position, news) -> NewsFavouritesFragment.this.startActivity(NewsContentActivity.createIntent(NewsFavouritesFragment.this.getContext(), news))));
+    @Override
+    public void onViewCreated(View view, Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+        recyclerView = rootView.findViewById(R.id.recyclerView);
+        myAdapter = new MyAdapter(newsList, (position, news) ->
+                NewsFavouritesFragment.this.startActivity(NewsContentActivity.createIntent(NewsFavouritesFragment.this.getContext(), news)));
 
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(getContext());
         DividerItemDecoration dividerItemDecoration = new DividerItemDecoration(requireContext(), linearLayoutManager.getOrientation());
         recyclerView.setLayoutManager(linearLayoutManager);
         recyclerView.addItemDecoration(dividerItemDecoration);
+    }
+
+    private void setAdapter() {
+
+        recyclerView.setAdapter(myAdapter);
     }
 
     private void updateFavouritesNews(List<FavouritesNews> news, Boolean addOrDelete) {
@@ -81,11 +95,10 @@ public class NewsFavouritesFragment extends Fragment {
             for (FavouritesNews i : news) {
                 idNews.add((long) i.getId());
             }
-            newsDao.getByIds(idNews)
+            mDisposable.add(newsDao.getByIds(idNews)
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
-
-                    .subscribe(new DisposableSingleObserver<List<ItemNews>>() {
+                    .subscribeWith(new DisposableSingleObserver<List<ItemNews>>() {
                         @Override
                         public void onSuccess(List<ItemNews> itemNewsList) {
                             newsList.addAll(itemNewsList);
@@ -96,7 +109,7 @@ public class NewsFavouritesFragment extends Fragment {
                         public void onError(Throwable e) {
 
                         }
-                    });
+                    }));
         } else {
             newsList.removeAll(news);
             setAdapter();

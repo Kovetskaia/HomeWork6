@@ -18,11 +18,11 @@ public class ItemNews implements News, ListItem, Serializable{
     @ColumnInfo
     private String titleNews;
     @ColumnInfo
-    private String dateNews;
+    private long dateNews;
     @ColumnInfo
     private String descriptionNews;
 
-    ItemNews(int id, String titleNews, String dateNews, String descriptionNews) {
+    ItemNews(int id, String titleNews, long dateNews, String descriptionNews) {
         this.id = id;
         this.titleNews = titleNews;
         this.dateNews = dateNews;
@@ -33,7 +33,7 @@ public class ItemNews implements News, ListItem, Serializable{
         return titleNews;
     }
 
-    String getDateNews() {
+    long getDateNews() {
         return dateNews;
     }
 

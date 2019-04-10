@@ -8,18 +8,23 @@ import android.view.MenuItem;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import org.joda.time.format.DateTimeFormat;
+import org.joda.time.format.DateTimeFormatter;
+
 import androidx.appcompat.app.AppCompatActivity;
 import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.observers.DisposableCompletableObserver;
 import io.reactivex.observers.DisposableSingleObserver;
 import io.reactivex.schedulers.Schedulers;
 
 public class NewsContentActivity extends AppCompatActivity {
-    ItemNews itemNews;
-    FavouritesNewsDao favouritesNewsDao;
-    FavouritesNews currentNews;
-    int id;
-    Boolean starVisible = false;
+    private FavouritesNewsDao favouritesNewsDao;
+    private FavouritesNews currentNews;
+    private int id;
+    private Boolean starVisible = false;
+    private final CompositeDisposable mDisposable = new CompositeDisposable();
+    private DateTimeFormatter dateFormat = DateTimeFormat.forPattern("yyyy-MMMM-dd");
 
     public static Intent createIntent(Context context, ItemNews news) {
         return new Intent(context, NewsContentActivity.class)
@@ -34,11 +39,11 @@ public class NewsContentActivity extends AppCompatActivity {
         TextView contentDate = findViewById(R.id.contentDate);
         TextView contentDescription = findViewById(R.id.contentDescription);
 
-        itemNews = (ItemNews) getIntent().getSerializableExtra(ItemNews.class.getSimpleName());
+        ItemNews itemNews = (ItemNews) getIntent().getSerializableExtra(ItemNews.class.getSimpleName());
         id = itemNews.getId();
 
         setTitle(itemNews.getTitleNews());
-        contentDate.setText(itemNews.getDateNews());
+        contentDate.setText(dateFormat.print(itemNews.getDateNews()));
         contentDescription.setText(itemNews.getDescriptionNews());
     }
 
@@ -48,11 +53,11 @@ public class NewsContentActivity extends AppCompatActivity {
         NewsDatabase db = App.getInstance().getDatabase();
         favouritesNewsDao = db.favouritesNewsDao();
 
-        favouritesNewsDao.getById(id)
+        mDisposable.add(favouritesNewsDao.getById(id)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
 
-                .subscribe(new DisposableSingleObserver<FavouritesNews>() {
+                .subscribeWith(new DisposableSingleObserver<FavouritesNews>() {
                     @Override
                     public void onSuccess(FavouritesNews favouritesNews) {
                         starVisible = true;
@@ -63,7 +68,7 @@ public class NewsContentActivity extends AppCompatActivity {
                     public void onError(Throwable e) {
                         starVisible = false;
                     }
-                });
+                }));
     }
 
     @Override
@@ -83,11 +88,11 @@ public class NewsContentActivity extends AppCompatActivity {
             if (!starVisible) {
 
                 currentNews = new FavouritesNews(id);
-                favouritesNewsDao.insert(currentNews)
+                mDisposable.add(favouritesNewsDao.insert(currentNews)
                         .subscribeOn(Schedulers.io())
                         .observeOn(AndroidSchedulers.mainThread())
 
-                        .subscribe(new DisposableCompletableObserver() {
+                        .subscribeWith(new DisposableCompletableObserver() {
                             @Override
                             public void onComplete() {
                                 Toast.makeText(NewsContentActivity.this, getString(R.string.addedToFavourites), Toast.LENGTH_LONG).show();
@@ -99,13 +104,13 @@ public class NewsContentActivity extends AppCompatActivity {
                             public void onError(Throwable e) {
                                 Toast.makeText(NewsContentActivity.this, getString(R.string.notAddedToFavourites), Toast.LENGTH_LONG).show();
                             }
-                        });
+                        }));
             } else {
 
-                favouritesNewsDao.delete(currentNews)
+                mDisposable.add(favouritesNewsDao.delete(currentNews)
                         .subscribeOn(Schedulers.io())
                         .observeOn(AndroidSchedulers.mainThread())
-                        .subscribe(new DisposableCompletableObserver() {
+                        .subscribeWith(new DisposableCompletableObserver() {
                             @Override
                             public void onComplete() {
                                 Toast.makeText(NewsContentActivity.this, getString(R.string.deletedFromFavourites), Toast.LENGTH_LONG).show();
@@ -117,11 +122,17 @@ public class NewsContentActivity extends AppCompatActivity {
                             public void onError(Throwable e) {
                                 Toast.makeText(NewsContentActivity.this, getString(R.string.notDeletedFromFavourites), Toast.LENGTH_LONG).show();
                             }
-                        });
+                        }));
 
             }
             return true;
         }
         return super.onOptionsItemSelected(menuItem);
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        mDisposable.clear();
     }
 }

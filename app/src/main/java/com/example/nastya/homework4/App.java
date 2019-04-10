@@ -2,9 +2,13 @@ package com.example.nastya.homework4;
 
 import android.app.Application;
 
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.GregorianCalendar;
+import java.util.List;
+
 import androidx.room.Room;
 import io.reactivex.android.schedulers.AndroidSchedulers;
-import io.reactivex.observers.DisposableCompletableObserver;
 import io.reactivex.schedulers.Schedulers;
 
 public class App extends Application {
@@ -28,45 +32,29 @@ public class App extends Application {
                 .build();
 
         newsDao = database.newsDao();
+
         if (newsDao.getCount() == 0) {
-            ItemNews itemNews1 = new ItemNews(1, getString(R.string.Title1), getString(R.string.Date1), getString(R.string.Description1));
-                insertNews(itemNews1);
-            ItemNews itemNews2 = new ItemNews(2, getString(R.string.Title2), getString(R.string.Date2), getString(R.string.Description2));
-            insertNews(itemNews2);
-
-            ItemNews itemNews3 = new ItemNews(3, getString(R.string.Title3), getString(R.string.Date3), getString(R.string.Description3));
-            insertNews(itemNews3);
-
-            ItemNews itemNews4 = new ItemNews(4, getString(R.string.Title4), getString(R.string.Date4), getString(R.string.Description4));
-            insertNews(itemNews4);
-
-            ItemNews itemNews5 = new ItemNews(5, getString(R.string.Title5), getString(R.string.Date5), getString(R.string.Description5));
-            insertNews(itemNews5);
-
-            ItemNews itemNews6 = new ItemNews(6, getString(R.string.Title6), getString(R.string.Date6), getString(R.string.Description6));
-            insertNews(itemNews6);
-
-            ItemNews itemNews7 = new ItemNews(7, getString(R.string.Title7), getString(R.string.Date7), getString(R.string.Description7));
-            insertNews(itemNews7);
+            List<ItemNews> list = new ArrayList<>();
+            list.add(new ItemNews(1, getString(R.string.Title1), ((new GregorianCalendar(2019, Calendar.FEBRUARY, 2)).getTime()).getTime(), getString(R.string.Description1)));
+            list.add(new ItemNews(2, getString(R.string.Title2), ((new GregorianCalendar(2019,Calendar.FEBRUARY,22)).getTime()).getTime(), getString(R.string.Description2)));
+            list.add(new ItemNews(3, getString(R.string.Title3), ((new GregorianCalendar(2019,Calendar.MARCH,2)).getTime()).getTime(), getString(R.string.Description3)));
+            list.add(new ItemNews(4, getString(R.string.Title4), ((new GregorianCalendar(2019,Calendar.APRIL,9)).getTime()).getTime(), getString(R.string.Description4)));
+            list.add(new ItemNews(5, getString(R.string.Title5), ((new GregorianCalendar(2019,Calendar.APRIL,8)).getTime()).getTime(), getString(R.string.Description5)));
+            list.add(new ItemNews(6, getString(R.string.Title6), ((new GregorianCalendar(2019,Calendar.APRIL,8)).getTime()).getTime(), getString(R.string.Description6)));
+            list.add(new ItemNews(7, getString(R.string.Title7), ((new GregorianCalendar(2018,Calendar.APRIL,8)).getTime()).getTime(), getString(R.string.Description7)));
+            insertNews(list);
         }
     }
-    void insertNews(ItemNews news) {
-        newsDao.insert(news)
+    void insertNews(List<ItemNews> news) {
+          newsDao.insert(news)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new DisposableCompletableObserver() {
-                    @Override
-                    public void onComplete() {
-
-                    }
-
-                    @Override
-                    public void onError(Throwable e) {
-
-                    }
-                });
+                .subscribe();
     }
     public NewsDatabase getDatabase() {
         return database;
     }
+
+
 }
+
