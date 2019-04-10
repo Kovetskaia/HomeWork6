@@ -18,17 +18,16 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.CompositeDisposable;
-import io.reactivex.functions.Consumer;
 import io.reactivex.schedulers.Schedulers;
 
 public class NewsListFragment extends Fragment {
+    private final CompositeDisposable mDisposable = new CompositeDisposable();
     private List<ListItem> itemsList = new ArrayList<>();
     private View rootView;
     private LocalDate curDay;
     private LocalDate yesDay;
     private MyAdapter myAdapter;
     private RecyclerView recyclerView;
-    private final CompositeDisposable mDisposable = new CompositeDisposable();
     private DateTimeFormatter dateFormat = DateTimeFormat.forPattern("yyyy-MM-dd");
 
     @Override
@@ -68,6 +67,7 @@ public class NewsListFragment extends Fragment {
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(listItems -> startInsert()));
     }
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         rootView = inflater.inflate(R.layout.fragment, container, false);
@@ -86,7 +86,7 @@ public class NewsListFragment extends Fragment {
         recyclerView.addItemDecoration(dividerItemDecoration);
     }
 
-    private void startInsert(){
+    private void startInsert() {
         recyclerView.setAdapter(myAdapter);
     }
 
@@ -100,6 +100,7 @@ public class NewsListFragment extends Fragment {
         }
         return date;
     }
+
     @Override
     public void onDestroy() {
         super.onDestroy();

@@ -11,7 +11,7 @@ interface News {
 }
 
 @Entity
-public class ItemNews implements News, ListItem, Serializable{
+public class ItemNews implements News, ListItem, Serializable {
 
     @PrimaryKey
     private int id;
@@ -62,7 +62,7 @@ public class ItemNews implements News, ListItem, Serializable{
 }
 
 @Entity
-class FavouritesNews implements News{
+class FavouritesNews implements News {
 
     @PrimaryKey
     private int id;

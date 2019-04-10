@@ -8,15 +8,12 @@ import android.view.ViewGroup;
 import java.util.ArrayList;
 import java.util.List;
 
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.CompositeDisposable;
-import io.reactivex.functions.Consumer;
 import io.reactivex.observers.DisposableSingleObserver;
 import io.reactivex.schedulers.Schedulers;
 
@@ -32,7 +29,6 @@ public class NewsFavouritesFragment extends Fragment {
     private RecyclerView recyclerView;
 
 
-
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
@@ -44,22 +40,22 @@ public class NewsFavouritesFragment extends Fragment {
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(favouritesNews -> {
-                    idToDelete.clear();
-                    idToDelete.addAll(favouritesNews);
-                    idToDelete.removeAll(currentFavouritesNews);
+                            idToDelete.clear();
+                            idToDelete.addAll(favouritesNews);
+                            idToDelete.removeAll(currentFavouritesNews);
 
-                    if (idToDelete.size() != 0) {
-                        updateFavouritesNews(idToDelete, true);
-                    }
+                            if (idToDelete.size() != 0) {
+                                updateFavouritesNews(idToDelete, true);
+                            }
 
-                    currentFavouritesNews.removeAll(favouritesNews);
+                            currentFavouritesNews.removeAll(favouritesNews);
 
-                    if (currentFavouritesNews.size() != 0) {
-                        updateFavouritesNews(currentFavouritesNews, false);
-                    }
+                            if (currentFavouritesNews.size() != 0) {
+                                updateFavouritesNews(currentFavouritesNews, false);
+                            }
 
-                    currentFavouritesNews = favouritesNews;
-                }
+                            currentFavouritesNews = favouritesNews;
+                        }
                 )
         );
     }

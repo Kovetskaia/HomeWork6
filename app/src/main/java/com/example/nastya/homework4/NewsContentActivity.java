@@ -19,11 +19,11 @@ import io.reactivex.observers.DisposableSingleObserver;
 import io.reactivex.schedulers.Schedulers;
 
 public class NewsContentActivity extends AppCompatActivity {
+    private final CompositeDisposable mDisposable = new CompositeDisposable();
     private FavouritesNewsDao favouritesNewsDao;
     private FavouritesNews currentNews;
     private int id;
     private Boolean starVisible = false;
-    private final CompositeDisposable mDisposable = new CompositeDisposable();
     private DateTimeFormatter dateFormat = DateTimeFormat.forPattern("yyyy-MMMM-dd");
 
     public static Intent createIntent(Context context, ItemNews news) {
